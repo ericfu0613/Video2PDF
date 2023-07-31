@@ -30,4 +30,4 @@ if __name__ == "__main__":
     convert_png_to_pdf(base_name, base_name)
 
     # 開啟PDF
-    os.system(f"open '{base_name}.pdf'")
+    #os.system(f"open '{base_name}.pdf'")
