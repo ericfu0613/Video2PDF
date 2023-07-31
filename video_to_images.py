@@ -4,6 +4,7 @@ from multiprocessing import Pool, cpu_count
 from tqdm import tqdm
 import subprocess
 import json
+os.environ['SDL_AUDIODRIVER'] = 'dummy'
 
 def get_video_dimensions(video_path):
 
@@ -38,7 +39,7 @@ def process_subtitle(args):
         end_time = int(end_time[0])*3600 + int(end_time[1])*60 + float(end_time[2].replace(",", "."))
 
         # Calculate the mid-point of the subtitle time range
-        mid_time = start_time + ((end_time - start_time) / 3)
+        mid_time = start_time + ((end_time - start_time) / 2)
 
         zh_text = " ".join(zh_parts[2:])
         frame_width, frame_height = get_video_dimensions(video_file_name)
@@ -55,7 +56,7 @@ def process_subtitle(args):
         else:
             zh_text_pos = ('center', frame_height - 30)
 
-        zh_text_clip = (TextClip(zh_text, font="黑體-簡-中黑", fontsize=zh_text_size, bg_color='black', color='yellow', stroke_width=0.25*scale_factor)
+        zh_text_clip = (TextClip(zh_text, font="Noto-Sans-Mono-CJK-SC", fontsize=zh_text_size, bg_color='black', color='yellow', stroke_width=0.25*scale_factor)
             .set_duration(end_time - mid_time)  # Update duration to be from mid_time to end_time
             .set_position(zh_text_pos))
 
@@ -85,6 +86,6 @@ def video_to_images(video_file_name: str):
         print(f"Failed to create directory: {base_name}. Error: {e}")
         raise
 
-    with Pool(cpu_count()) as pool:
+    with Pool(cpu_count()*3) as pool:
         for _ in tqdm(pool.imap_unordered(process_subtitle, [(i, zh_subtitles[i], video_file_name, base_name) for i in range(len(zh_subtitles))]), total=len(zh_subtitles)):
             pass
